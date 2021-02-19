@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# This script sends my terminfo definition over to the VMs so that my $TERM
+# value works correctly.
+
+set -eu
+
+cd "$(dirname "$(dirname "$0")")"
+
+for host in alice bob; do
+  infocmp "$TERM" | "./bin/${host}" "cat > /tmp/$TERM.info"
+  for user in vagrant root; do
+    echo "Sending ${TERM} to ${user}@${host}..." 1>&2
+    "./bin/${host}" "sudo -H -u $user tic /tmp/$TERM.info"
+  done
+done
+
+# EOF
